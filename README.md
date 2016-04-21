@@ -1,6 +1,6 @@
 # python-datapath
 
-XPath like functions for python data structures to get and *set* values based
+XPath like functions for python data structures to get and **set** values based
 on a data description string.
 
 Inspired by, but not completely compliant with the JSONPath specification
@@ -9,33 +9,40 @@ suggested at http://goessner.net/articles/JsonPath/
 Why should I use this library?
 ------------------------------
 
-datapath lets you:
+**YOU REALLY SHOULDN'T** - This is nowhere near ready to be used yet!
+
+`datapath` lets you:
 
  * Get values from deeply nested structures without caring if any of the 
  intermediate keys exist
  * Set values into data structures and have all intermediate values created 
  for you
+ * Turn deeply nested structures into flat dicts and back
  
 
 Compact paths
 -------------
 
-The datapath library supports compact paths which cut a small amount of the 
+The `datapath` library supports compact paths which cut a small amount of the 
 verboseness of the full JSONPath spec.  
 
-The JSONPath spec suggest '@.' for local anchoring and '$.' for root anchoring.
-Where anchoring is not specified or relevant datapath allows the omission of
-the leading identifiers for example:
+The JSONPath spec suggest `'@.'` for local anchoring and `'$.'` for root 
+anchoring. Where anchoring is not specified or relevant datapath allows the 
+omission of the leading identifiers for example:
 
-| JSONPath | datapath |
-| $.a | a, .a, ["a"], ['a'] | 
+| JSONPath | datapath            |
+| -------- | ------------------- |
+| $.a      | a, .a, ["a"], ['a'] | 
 
 
 Compliance levels
 -----------------
 
-The datapath library does not support
+The `datapath` library does not support the following parts of JSONPath at the
+moment:
 
+ * List slices
+ * Selectors beyond `'*'`
 
 Enough talking!
 ---------------
@@ -54,4 +61,4 @@ Enough talking!
     
     set_path({}, 'not_there[4].more', 'value')
     # {'not_there': [None, None, None, {'more': 'value'}]}
-    
+   
