@@ -36,3 +36,6 @@ class TestCrud(TestCase):
         for path, expected in tests.iteritems():
             self.assertEqual(sorted(find_path(data, path)), sorted(expected),
                              "We get the expected value for '%s'" % path)
+
+        self.assertEqual(find_path(['good'], '[0]'), ['good'],
+                         'Can get a leading list index')

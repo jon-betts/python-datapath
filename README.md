@@ -29,14 +29,30 @@ Compact paths
 The `datapath` library supports compact paths which cut a small amount of the 
 verboseness of the full JSONPath spec.  
 
+`datapath` will accept compact paths without an root/relative prefix:
+
+ * `.a` - Dict key "a" on the current data dict
+ * `.['a']` - Dict key "a" on the current data dict
+ * `.["a"]` - Dict key "a" on the current data dict
+ * `[6]` - Array index "6" on the current data list
+ * `*` - Every dict or list item
+ * `.*` - Every dict or list item
+ * `.[*]` - Every dict or list item
+ 
 The JSONPath spec suggest `'@.'` for local anchoring and `'$.'` for root 
 anchoring. Where anchoring is not specified or relevant datapath allows the 
 omission of the leading identifiers for example:
 
 | JSONPath | datapath            |
 | -------- | ------------------- |
-| $.a      | a, .a, ["a"], ['a'] | 
+| $.a, | a | 
+| @.a | a |
+| $['a'] | a |
+| @['a'] | a |
+| $["a"] | a |
+| @["a"] | a |
 
+**NOTE!** - Currently `datapath` doesn't allow anchoring markers
 
 Compliance levels
 -----------------
@@ -46,7 +62,7 @@ moment:
 
  * List slices
  * Selectors beyond `'*'` - no ability to do things like `book[author='lily']`
- * Anchoring specifications: `'@.'`, ''$.'`
+ * Anchoring specifications: `'@.'`, `'$.'`
 
 Enough talking!
 ---------------
