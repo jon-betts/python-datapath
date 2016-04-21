@@ -1,10 +1,13 @@
 # python-datapath
 
-XPath like functions for python data structures to get and **set** values based
-on a data description string.
+Use [JSONPath](http://goessner.net/articles/JsonPath/)
+like strings  to **get and set ** values in a deeply nested data structure 
+with graceful retrieval if the structure does not exist and
+[autovivification](https://en.wikipedia.org/wiki/Autovivification) when setting
+values.
 
-Inspired by, but not completely compliant with the JSONPath specification
-suggested at http://goessner.net/articles/JsonPath/
+Inspired by, but not completely compliant with the [JSONPath specification]
+(http://goessner.net/articles/JsonPath/)
 
 Why should I use this library?
 ------------------------------
@@ -42,7 +45,8 @@ The `datapath` library does not support the following parts of JSONPath at the
 moment:
 
  * List slices
- * Selectors beyond `'*'`
+ * Selectors beyond `'*'` - no ability to do things like `book[author='lily']`
+ * Anchoring specifications: `'@.'`, ''$.'`
 
 Enough talking!
 ---------------
@@ -61,4 +65,11 @@ Enough talking!
     
     set_path({}, 'not_there[4].more', 'value')
     # {'not_there': [None, None, None, {'more': 'value'}]}
+    
+Known issues
+------------
+
+ * This library doesn't work, and using it is a fools errand
+ * Attempting to set recursive paths (e.g. 'a..b') doesn't work
+ * Recursive paths in general are likely to have undefined behavior
    
