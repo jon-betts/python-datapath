@@ -37,6 +37,7 @@ are made:
 Examples:
 
 | JSONPath | `datapath` equivalents |
+| -------- | -----------------------|
 | $.a | a, .a, ["a"], ['a']
 | $.[7] | [7]
 | $.* | *, .* |
@@ -48,14 +49,14 @@ The JSONPath spec suggest `'@.'` for local anchoring and `'$.'` for root
 anchoring. Where anchoring is not specified or relevant datapath allows the 
 omission of the leading identifiers for example:
 
-| JSONPath | datapath            |
+| JSONPath | `datapath` compact  |
 | -------- | ------------------- |
 | $.a, | a | 
 | @.a | a |
-| $['a'] | a |
-| @['a'] | a |
-| $["a"] | a |
-| @["a"] | a |
+| $.['a'] | a |
+| @.['a'] | a |
+| $.["a"] | a |
+| @.["a"] | a |
 
 **NOTE!** - Currently `datapath` doesn't allow anchoring markers
 
