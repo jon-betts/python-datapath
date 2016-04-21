@@ -1,7 +1,7 @@
 # python-datapath
 
 Use [JSONPath](http://goessner.net/articles/JsonPath/)
-like strings  to **get and set ** values in a deeply nested data structure 
+like strings  to **get and set** values in a deeply nested data structure 
 with graceful retrieval if the structure does not exist and
 [autovivification](https://en.wikipedia.org/wiki/Autovivification) when setting
 values.
