@@ -27,18 +27,23 @@ Compact paths
 -------------
 
 The `datapath` library supports compact paths which cut a small amount of the 
-verboseness of the full JSONPath spec.  
-
-`datapath` will accept compact paths without an root/relative prefix:
-
- * `.a` - Dict key "a" on the current data dict
- * `.['a']` - Dict key "a" on the current data dict
- * `.["a"]` - Dict key "a" on the current data dict
- * `[6]` - Array index "6" on the current data list
- * `*` - Every dict or list item
- * `.*` - Every dict or list item
- * `.[*]` - Every dict or list item
+verboseness of the full JSONPath spec. A number of simplifying assumptions 
+are made:
+  
+ * All paths are local
+ * 'Naked' paths without a prefix are assumed to be dict keys
+ * Bracked paths are assumed to be on the local object
  
+Examples:
+
+| JSONPath | `datapath` equivalents |
+| $.a | a, .a, ["a"], ['a']
+| $.[7] | [7]
+| $.* | *, .* |
+| $..a | ..a | 
+| @..a | ..a |
+| @.a | a, .a, ["a"], ['a']
+
 The JSONPath spec suggest `'@.'` for local anchoring and `'$.'` for root 
 anchoring. Where anchoring is not specified or relevant datapath allows the 
 omission of the leading identifiers for example:
@@ -53,6 +58,15 @@ omission of the leading identifiers for example:
 | @["a"] | a |
 
 **NOTE!** - Currently `datapath` doesn't allow anchoring markers
+
+Escaping
+--------
+
+You can set a key with a dot, or any other reserved character by escaping it:
+
+    from datapath.crud import get_path
+     
+    print get_path('a\\.b', {'a.b' : 5})  # 5!
 
 Compliance levels
 -----------------
