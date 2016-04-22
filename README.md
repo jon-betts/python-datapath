@@ -38,12 +38,12 @@ Examples:
 
 | JSONPath | `datapath` equivalents |
 | -------- | -----------------------|
-| $.a | a, .a, ["a"], ['a']
-| $.[7] | [7]
-| $.* | *, .* |
-| $..a | ..a | 
-| @..a | ..a |
-| @.a | a, .a, ["a"], ['a']
+| $.a      | a, .a, ["a"], ['a']    |
+| $.[7]    | [7]                    |
+| $.*      | *, .*                  |
+| $..a     | ..a                    |
+| @..a     | ..a                    |
+| @.a      | a, .a, ["a"], ['a']    |
 
 The JSONPath spec suggest `'@.'` for local anchoring and `'$.'` for root 
 anchoring. Where anchoring is not specified or relevant datapath allows the 
@@ -51,12 +51,12 @@ omission of the leading identifiers for example:
 
 | JSONPath | `datapath` compact  |
 | -------- | ------------------- |
-| $.a, | a | 
-| @.a | a |
-| $.['a'] | a |
-| @.['a'] | a |
-| $.["a"] | a |
-| @.["a"] | a |
+| $.a, | a |                     |
+| @.a | a  |                     |
+| $.['a']  | a                   |
+| @.['a']  | a                   |
+| $.["a"]  | a                   |
+| @.["a"]  | a                   |
 
 **NOTE!** - Currently `datapath` doesn't allow anchoring markers
 
@@ -107,4 +107,4 @@ Known issues
  * This library doesn't work, and using it is a fools errand
  * Attempting to set recursive paths (e.g. 'a..b') doesn't work
  * Recursive paths in general are likely to have undefined behavior
-   
+  
