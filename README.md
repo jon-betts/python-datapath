@@ -65,9 +65,11 @@ Escaping
 
 You can set a key with a dot, or any other reserved character by escaping it:
 
-    from datapath.crud import get_path
-     
-    print get_path('a\\.b', {'a.b' : 5})  # 5!
+```python
+from datapath.crud import get_path
+ 
+print get_path('a\\.b', {'a.b' : 5})  # 5!
+```
 
 Compliance levels
 -----------------
@@ -82,20 +84,22 @@ moment:
 Enough talking!
 ---------------
 
-    from datapath.crud import get_path, find_path, set_path
+```python
+from datapath.crud import get_path, find_path, set_path
+
+data = {
+    'a': ['hello', 'world'],
+    'b': 5
+}
     
-    data = {
-        'a': ['hello', 'world'],
-        'b': 5
-    }
-        
-    print get_path(data, 'a')     # ['hello', 'world']
-    print get_path(data, 'a[0]')  # 'hello'
-    
-    find_path(data, '*.*')      # [['hello', 'world'], 5]
-    
-    set_path({}, 'not_there[4].more', 'value')
-    # {'not_there': [None, None, None, {'more': 'value'}]}
+print get_path(data, 'a')     # ['hello', 'world']
+print get_path(data, 'a[0]')  # 'hello'
+
+find_path(data, '*.*')      # [['hello', 'world'], 5]
+
+set_path({}, 'not_there[4].more', 'value')
+# {'not_there': [None, None, None, {'more': 'value'}]}
+```
     
 Known issues
 ------------
