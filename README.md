@@ -43,14 +43,21 @@ a = ddict({
     }
 })
 
-# Retrieve a value deeply nested
+# Retrieve a value deeply nested value
+
+# ...by using it as a normal dict
+print a['store']['book'][0]['price']  # Not very safe
+print a.get('store', {}).get('book', [{}])[0].get('price')  # Much safer
+
+# ... or using datapath
 print a[['store.book:0.price']]
 
 # Retrieve a value that doesn't exist yet without an issue (with a default)
 print a[['store.book:10.price', 0]]
 
-# Set a value that doesn't exist yet
+# Set values on objects that don't yet exist
 a[['store.book:2.price']] = 8.99
+a[['new.here:3.escaped\\.dot']] = 'All intermediate structures created'
 
 # Set all book categories at once
 a[['store.book:*.category']] = 'fiction'
