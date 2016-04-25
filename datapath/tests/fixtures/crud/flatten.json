@@ -1,0 +1,27 @@
+[
+    {
+        "unflat": {},
+        "flat": {},
+        "message": "empty dict"
+    },
+    {
+        "unflat": {"a": 1, "b": 2, "c": 3},
+        "flat": {"a": 1, "b": 2, "c": 3},
+        "message": "basic dict"
+    },
+    {
+        "unflat": {"a.b": 2, "c:1": 3},
+        "flat": {"a\\.b": 2, "c\\:1": 3},
+        "message": "dict with escaped keys"
+    },
+    {
+        "unflat": {"a": [0, 1, 2]},
+        "flat": {"a:0": 0, "a:1": 1, "a:2": 2},
+        "message": "basic list"
+    },
+    {
+        "unflat": {"a": [0, 1, 2]},
+        "flat": {"a:0": 0, "a:1": 1, "a:2": 2},
+        "message": "basic list"
+    }
+]

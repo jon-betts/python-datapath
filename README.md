@@ -46,7 +46,7 @@ Examples:
 | @.a      | a, .a, ["a"], ['a']    |
 
 The JSONPath spec suggest `'@.'` for local anchoring and `'$.'` for root 
-anchoring. Where anchoring is not specified or relevant datapath allows the 
+anchoring. Where anchoring is not specified or relevant `datapath` allows the 
 omission of the leading identifiers for example:
 
 | JSONPath | `datapath` compact  |
@@ -85,20 +85,40 @@ Enough talking!
 ---------------
 
 ```python
-from datapath.crud import get_path, find_path, set_path
+from datapath import ddict
 
-data = {
-    'a': ['hello', 'world'],
-    'b': 5
-}
-    
-print get_path(data, 'a')     # ['hello', 'world']
-print get_path(data, 'a[0]')  # 'hello'
+a = ddict({
+    'store': {
+        'book': [
+            {
+                'title': 'Sayings of the Century',
+                'price': 8.95
+            }
+        ]
+    },
+    'bicycle': {
+        'color': 'red',
+        'price': 19.95
+    }
+})
 
-find_path(data, '*.*')      # [['hello', 'world'], 5]
+# Retrieve a value deeply nested
+print a[['store.book:0.price']]
 
-set_path({}, 'not_there[4].more', 'value')
-# {'not_there': [None, None, None, {'more': 'value'}]}
+# Retrieve a value that doesn't exist yet without an issue (with a default)
+print a[['store.book:10.price', 0]]
+
+# Set a value that doesn't exist yet
+a[['store.book:2.price']] = 8.99
+
+# Set all book categories at once
+a[['store.book:*.category']] = 'fiction'
+
+# The price of everything
+print a[["..price"]]
+
+# The price of everything in the store
+print a[["store..price"]]
 ```
     
 Known issues

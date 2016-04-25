@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from datapath.crud import find_path
+from datapath.tests import json_fixture
+from datapath.crud import find_path, flatten, unflatten
 
 
 class TestCrud(TestCase):
@@ -39,3 +40,19 @@ class TestCrud(TestCase):
 
         self.assertEqual(find_path(['good'], '[0]'), ['good'],
                          'Can get a leading list index')
+
+    def test_unflatten(self):
+        tests = json_fixture('crud/flatten.json')
+
+        for test in tests:
+            self.assertEqual(
+                unflatten(test['flat']), test['unflat'],
+                "We can unflatten " + test['message'])
+
+    def test_flatten(self):
+        tests = json_fixture('crud/flatten.json')
+
+        for test in tests:
+            self.assertEqual(
+                flatten(test['unflat']), test['flat'],
+                "We can flatten " + test['message'])

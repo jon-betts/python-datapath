@@ -9,17 +9,19 @@ TYPE_MASK = 0x000F
 
 KEY_LITERAL = 1 << 8
 KEY_WILD = 2 << 8
-KEY_RECURSE = 4 << 8  # TODO - Is recurse a key type or a traversal?
 KEY_MASK = 0x00F0
 
-ANCHOR_LOCAL = 1 << 16
-ANCHOR_ABSOLUTE = 2 << 16
-ANCHOR_MASK = 0x0F00
+TRAVERSAL_CHILD = 1 << 16
+TRAVERSAL_RECURSE = 2 << 16
+TRAVERSAL_MASK = 0x0F00
+
+ANCHOR_LOCAL = 1 << 24
+ANCHOR_ABSOLUTE = 2 << 24
+ANCHOR_MASK = 0xF000
 
 
 # -------------------------------------------------------------------------- #
 
-CHARS_RESERVED = '."[]'
 CHARS_WILD = '*'
 # TODO - This isn't used, we look for the chars separately in the parser
 CHARS_RECURSE = '..'
@@ -43,7 +45,8 @@ STRINGS = {
     TYPE_DICT: 'TYPE_DICT',
     KEY_LITERAL: 'KEY_LITERAL',
     KEY_WILD: 'KEY_WILD',
-    KEY_RECURSE: 'KEY_RECURSE'
+    TRAVERSAL_CHILD: 'TRAVERSAL_CHILD',
+    TRAVERSAL_RECURSE: 'TRAVERSAL_RECURSE'
 }
 
 TYPE_TO_TYPE_CODE = {

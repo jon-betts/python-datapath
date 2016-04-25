@@ -59,4 +59,13 @@ class BranchingList(object):
 
 
 def guess_type(obj):
-    return c.TYPE_TO_TYPE_CODE.get(type(obj), c.TYPE_LEAF)
+    obj_type = c.TYPE_TO_TYPE_CODE.get(type(obj))
+
+    if obj_type:
+        return obj_type
+
+    for _type, code in c.TYPE_TO_TYPE_CODE.iteritems():
+        if isinstance(obj, _type):
+            return code
+
+    return c.TYPE_LEAF

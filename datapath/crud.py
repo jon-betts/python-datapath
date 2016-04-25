@@ -28,9 +28,14 @@ def flatten(data, format=compact_path):
     return out
 
 
-def unflatten(data):
+def unflatten(data, existing=None):
+    if existing is None:
+        existing = {}
+
     for path_string, value in data.iteritems():
-        set_path(data, path_string, value)
+        set_path(existing, path_string, value)
+
+    return existing
 
 
 # ----------------- #
@@ -61,7 +66,7 @@ def get_path_parts(data, path_parts, default=None):
 
         return c.WALK_CONTINUE
 
-    walk_path(data, _read_one, path_parts, on_mismatch=c.ON_MISMATCH_FAIL)
+    walk_path(data, _read_one, path_parts, on_mismatch=c.ON_MISMATCH_CONTINUE)
 
     return item[0]
 

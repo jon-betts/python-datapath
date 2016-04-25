@@ -2,33 +2,25 @@ import re
 
 from datapath import constants as c
 
-RESERVED_REGEX = re.compile('([' + re.escape(c.CHARS_RESERVED) + '])')
+
+COMPACT_RESERVED = re.compile(r'([' + re.escape('.:[') + r'])')
 
 
-def canonical_path(parts):
-    path_string = ''
-
-    for key_type, key in parts:
-        if key_type & c.TYPE_DICT:
-            if RESERVED_REGEX.search(key):
-                key = re.sub(RESERVED_REGEX, r'\\\1', key)
-
-            if key_type & c.KEY_LITERAL:
-                key = '"' + key + '"'
-
-        path_string += '[%s]' % key
-
-    return path_string
+def canonical_path(path, is_reversed=False):
+    return ''
 
 
 def compact_path(parts, is_reversed=False):
-    parts = [_compact_part(*part) for part in parts]
+    if not parts:
+        return ''
+
+    str_parts = [_compact_part(*part) for part in parts]
     if is_reversed:
-        parts = reversed(parts)
+        str_parts = reversed(str_parts)
 
-    path = ''.join(parts)
+    path = ''.join(str_parts)
 
-    if path.startswith('.'):
+    if path.startswith('.') and not path.startswith('..'):
         return path[1:]
 
     return path
@@ -38,10 +30,19 @@ def compact_path(parts, is_reversed=False):
 # Internal methods
 
 def _compact_part(key_type, key):
-    if key_type & c.TYPE_DICT and RESERVED_REGEX.search(key):
-        return '["%s"]' % re.sub(RESERVED_REGEX, r'\\\1', key)
+    if key_type & c.TYPE_DICT:
+        key = '.' + re.sub(COMPACT_RESERVED, r'\\\1', key)
 
     elif key_type & c.TYPE_LIST:
-        return ':%s' % key
+        key = ':' + str(key)
 
-    return '.%s' % key
+    if key_type & c.TRAVERSAL_CHILD:
+        return key
+
+    elif key_type & c.TRAVERSAL_RECURSE:
+        if key_type & c.TYPE_DICT:
+            return '.' + key
+
+        return '..' + key
+
+    raise Exception('WUT?')

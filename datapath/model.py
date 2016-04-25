@@ -1,62 +1,55 @@
-import datapath.constants
 from datapath.parser import parse_path
-from datapath.format import canonical_path, compact_path
 from datapath import crud
+from datapath import constants as c
 
 
-class Path(object):
-    def __init__(self, path_string):
-        self.path_string = path_string
-        self.parts = parse_path(path_string)
-
-    def canonical(self):
-        return canonical_path(self.parts)
-
-    def compact(self):
-        return compact_path(self.parts)
-
-    def get(self, data, default=None):
-        return crud.get_path_parts(data, self.parts, default)
-
-    def find(self, data, on_mismatch=datapath.constants.ON_MISMATCH_CONTINUE):
-        return crud.find_path_parts(data, self.parts)
-
-    def set(self, data, value):
-        return crud.set_path_parts(data, self.parts, value)
-
-    def __repr__(self):
-        return self.compact()
-
-
-class AwareDict(object):
-    @classmethod
-    def unflatten(cls, flat_dict):
-        return AwareDict(crud.unflatten(flat_dict))
-
-    def __init__(self, data=None):
-        if data is None:
-            data = {}
-        self.data = data
+class DataPathDict(dict):
+    # ----------- #
+    # Crud access
 
     def find(self, path_string):
-        return crud.find_path(self.data, path_string)
+        return crud.find_path(self, path_string)
 
     def get(self, path_string, default=None):
-        return crud.get_path(self.data, path_string, default)
+        return crud.get_path(self, path_string, default)
 
     def set(self, path_string, value):
-        return crud.set_path(self.data, path_string, value)
+        return crud.set_path(self, path_string, value)
 
     def flatten(self):
-        return crud.flatten(self.data)
+        return crud.flatten(self)
 
+    def merge(self, other):
+        for path_string, value in crud.flatten(other).iteritems():
+            self.set(path_string, value)
 
-class EnabledDict(AwareDict):
+        return self
+
+    @classmethod
+    def unflatten(cls, flat_dict):
+        return DataPathDict(crud.unflatten(flat_dict))
+
+    # ------------- #
+    # Magic methods
+
     def __getitem__(self, item):
-        return self.get(item)
+        if isinstance(item, list):
+            path_parts = parse_path(item[0])
+
+            for key_type, _ in path_parts:
+                if key_type & (c.KEY_WILD | c.TRAVERSAL_RECURSE):
+                    return crud.find_path_parts(self, path_parts)
+
+            default = None
+            if len(item) > 1:
+                default = item[1]
+
+            return crud.get_path_parts(self, path_parts, default=default)
+
+        return super(DataPathDict, self).__getitem__(item)
 
     def __setitem__(self, key, value):
-        return self.set(key, value)
+        if isinstance(key, list):
+            return crud.set_path(self, key[0], value)
 
-    def __repr__(self):
-        return self.data.__repr__()
+        return super(DataPathDict, self).__setitem__(key, value)
