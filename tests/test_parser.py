@@ -13,6 +13,7 @@ class TestParser(TestCase):
             '.a': ['a'],
             '[a]': ['a'],
             '["a"]': ['a'],
+            ':9': [9],
             '[9]': [9],
             'a.b': ['a', 'b'],
             'a[6]': ['a', 6],
@@ -31,15 +32,18 @@ class TestParser(TestCase):
 
     def test_parser_typing(self):
         tests = {
-            'a': ('a', c.TYPE_DICT | c.KEY_LITERAL),
-            '.a': ('a', c.TYPE_DICT | c.KEY_LITERAL),
-            '["a"]': ('a', c.TYPE_DICT | c.KEY_LITERAL),
-            "['a']": ('a', c.TYPE_DICT | c.KEY_LITERAL),
-            '[1]': (1, c.TYPE_LIST | c.KEY_LITERAL),
-            '*': ('*', c.KEY_WILD | c.TYPE_DICT | c.TYPE_LIST),
-            '.*': ('*', c.KEY_WILD | c.TYPE_DICT | c.TYPE_LIST),
+            'a': ('a', c.KEY_LITERAL | c.TYPE_DICT),
+            '.a': ('a', c.KEY_LITERAL | c.TYPE_DICT),
+            '["a"]': ('a', c.KEY_LITERAL | c.TYPE_DICT),
+            "['a']": ('a', c.KEY_LITERAL | c.TYPE_DICT),
+            '[1]': (1, c.KEY_LITERAL | c.TYPE_LIST),
+            ':1': (1, c.KEY_LITERAL | c.TYPE_LIST),
+            ':*': ('*', c.KEY_WILD | c.TYPE_LIST),
+            '*': ('*', c.KEY_WILD | c.TYPE_DICT),
+            '.*': ('*', c.KEY_WILD | c.TYPE_DICT),
             '[*]': ('*', c.KEY_WILD | c.TYPE_DICT | c.TYPE_LIST),
             '..a': ('a', c.KEY_RECURSE | c.KEY_LITERAL | c.TYPE_DICT),
+            '..*': ('*', c.KEY_RECURSE | c.KEY_WILD | c.TYPE_DICT),
         }
 
         for path, (key, key_type) in tests.iteritems():
@@ -50,5 +54,6 @@ class TestParser(TestCase):
 
             self.assertEqual(got_key, key,
                              'Got the expected key for %s' % path)
+
             self.assertEqual(got_type, key_type,
                              'Got the expected type for %s' % path)

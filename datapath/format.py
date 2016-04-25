@@ -42,6 +42,6 @@ def _compact_part(key_type, key):
         return '["%s"]' % re.sub(RESERVED_REGEX, r'\\\1', key)
 
     elif key_type & c.TYPE_LIST:
-        return '[%s]' % key
+        return ':%s' % key
 
     return '.%s' % key

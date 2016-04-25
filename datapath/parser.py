@@ -1,5 +1,7 @@
 from datapath import constants as c
 
+START_TOKEN = '.:['
+
 
 def _find_next(string, pos, stop_chars):
     escaping = False
@@ -24,7 +26,7 @@ def _find_next(string, pos, stop_chars):
 
 def _key_type(string, key_type=0):
     if string == c.CHARS_WILD:
-        return key_type | c.KEY_WILD | c.TYPE_LIST | c.TYPE_DICT
+        return key_type | c.KEY_WILD
 
     return key_type | c.KEY_LITERAL
 
@@ -32,7 +34,7 @@ def _key_type(string, key_type=0):
 def parse_path(path_string):
     parts = []
 
-    start, key = _find_next(path_string, 0, '.[')
+    start, key = _find_next(path_string, 0, START_TOKEN)
     if start != 0:
         parts.append((_key_type(key, c.TYPE_DICT), key))
 
@@ -45,11 +47,19 @@ def parse_path(path_string):
         # Dot notation
         if char == '.':
             if next_char == '.':
-                start, key = _find_next(path_string, start + 1, '.[')
+                start, key = _find_next(path_string, start + 1, START_TOKEN)
                 parts.append((_key_type(key, c.TYPE_DICT | c.KEY_RECURSE), key))
             else:
-                start, key = _find_next(path_string, start, '.[')
+                start, key = _find_next(path_string, start, START_TOKEN)
                 parts.append((_key_type(key, c.TYPE_DICT), key))
+
+        elif char == ':':
+            start, key = _find_next(path_string, start, START_TOKEN)
+            key_type = _key_type(key, c.TYPE_LIST)
+            if not key_type & c.KEY_WILD:
+                key = int(key)
+
+            parts.append((key_type, key))
 
         # In brackets
         elif char == '[':
@@ -70,8 +80,10 @@ def parse_path(path_string):
 
                 if key.isdigit():
                     parts.append((c.TYPE_LIST | c.KEY_LITERAL, int(key)))
+                elif key == c.CHARS_WILD:
+                    parts.append((c.TYPE_LIST | c.TYPE_DICT | c.KEY_WILD, key))
                 else:
-                    parts.append((_key_type(key, c.TYPE_DICT), key))
+                    parts.append((c.TYPE_DICT | c.KEY_LITERAL, key))
 
             # Skip the bracket to the next char
             start += 1
