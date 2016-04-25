@@ -21,7 +21,46 @@ Why should I use this library?
  * Set values into data structures and have all intermediate values created 
  for you
  * Turn deeply nested structures into flat dicts and back
- 
+
+Enough talking!
+---------------
+
+```python
+from datapath import ddict
+
+a = ddict({
+    'store': {
+        'book': [
+            {
+                'title': 'Sayings of the Century',
+                'price': 8.95
+            }
+        ]
+    },
+    'bicycle': {
+        'color': 'red',
+        'price': 19.95
+    }
+})
+
+# Retrieve a value deeply nested
+print a[['store.book:0.price']]
+
+# Retrieve a value that doesn't exist yet without an issue (with a default)
+print a[['store.book:10.price', 0]]
+
+# Set a value that doesn't exist yet
+a[['store.book:2.price']] = 8.99
+
+# Set all book categories at once
+a[['store.book:*.category']] = 'fiction'
+
+# The price of everything
+print a[["..price"]]
+
+# The price of everything in the store
+print a[["store..price"]]
+```
 
 Compact paths
 -------------
@@ -81,50 +120,10 @@ moment:
  * Selectors beyond `'*'` - no ability to do things like `book[author='lily']`
  * Anchoring specifications: `'@.'`, `'$.'`
 
-Enough talking!
----------------
-
-```python
-from datapath import ddict
-
-a = ddict({
-    'store': {
-        'book': [
-            {
-                'title': 'Sayings of the Century',
-                'price': 8.95
-            }
-        ]
-    },
-    'bicycle': {
-        'color': 'red',
-        'price': 19.95
-    }
-})
-
-# Retrieve a value deeply nested
-print a[['store.book:0.price']]
-
-# Retrieve a value that doesn't exist yet without an issue (with a default)
-print a[['store.book:10.price', 0]]
-
-# Set a value that doesn't exist yet
-a[['store.book:2.price']] = 8.99
-
-# Set all book categories at once
-a[['store.book:*.category']] = 'fiction'
-
-# The price of everything
-print a[["..price"]]
-
-# The price of everything in the store
-print a[["store..price"]]
-```
-    
 Known issues
 ------------
 
  * This library doesn't work, and using it is a fools errand
- * Attempting to set recursive paths (e.g. 'a..b') doesn't work
- * Recursive paths in general are likely to have undefined behavior
+ * Recursive paths in are likely to have undefined behavior
+ * canonical_path is not working currently
   
