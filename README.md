@@ -132,5 +132,4 @@ Known issues
 
  * This library doesn't work, and using it is a fools errand
  * Recursive paths in are likely to have undefined behavior
- * canonical_path is not working currently
   

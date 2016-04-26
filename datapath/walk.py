@@ -1,5 +1,5 @@
 from datapath import constants as c
-from datapath.format import canonical_path
+from datapath.format import compact_path
 from datapath.util import BranchingList, guess_type
 
 
@@ -94,7 +94,7 @@ def _walk_path(context, data, path_pos, parent, key, path):
                 c.STRINGS[key_type & c.TYPE_MASK],
                 c.STRINGS[data_type],
                 data,
-                canonical_path(context['path_parts'])
+                compact_path(context['path_parts'])
             ))
 
         elif context['on_mismatch'] == c.ON_MISMATCH_CONTINUE:

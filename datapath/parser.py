@@ -77,7 +77,7 @@ def _capture_next(path_string, start):
         if key.isdigit():
             return c.TYPE_LIST | c.KEY_LITERAL, int(key), start + 1
         elif key == c.CHARS_WILD:
-            return c.TYPE_LIST | c.TYPE_DICT | c.KEY_WILD, key, start + 1
+            return c.TYPE_DICT | c.KEY_WILD, key, start + 1
         else:
             return c.TYPE_DICT | c.KEY_LITERAL, key, start + 1
 

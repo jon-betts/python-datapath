@@ -6,8 +6,25 @@ from datapath import constants as c
 COMPACT_RESERVED = re.compile(r'([' + re.escape('.:[') + r'])')
 
 
-def canonical_path(path, is_reversed=False):
-    return ''
+def canonical_path(parts, is_reversed=False):
+    path = ''
+    for key_type, key in parts:
+        if key_type & c.TRAVERSAL_RECURSE:
+            path += '..'
+
+        if key_type & c.TYPE_LIST:
+            if key_type & c.KEY_WILD:
+                raise Exception('No canonical representation of ' +
+                                ', '.join(c.describe(key_type)))
+            else:
+                path += '[%s]' % key
+        else:
+            if key_type & c.KEY_WILD:
+                path += '[*]'
+            else:
+                path += '["%s"]' % key
+
+    return path
 
 
 def compact_path(parts, is_reversed=False):

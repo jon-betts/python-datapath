@@ -19,15 +19,14 @@ class TestParser(TestCase):
             ':*': ((c.TRAVERSAL_CHILD | c.KEY_WILD | c.TYPE_LIST, '*'),),
             '*': ((c.TRAVERSAL_CHILD | c.KEY_WILD | c.TYPE_DICT, '*'),),
             '.*': ((c.TRAVERSAL_CHILD | c.KEY_WILD | c.TYPE_DICT, '*'),),
-            '[*]': ((c.TRAVERSAL_CHILD | c.KEY_WILD | c.TYPE_DICT | c.TYPE_LIST, '*'),),
+            '[*]': ((c.TRAVERSAL_CHILD | c.KEY_WILD | c.TYPE_DICT, '*'),),
             '..a': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
             '..*': ((c.TRAVERSAL_RECURSE | c.KEY_WILD | c.TYPE_DICT, '*'),),
             '..[9]': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_LIST, 9),),
             '..9': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_DICT, '9'),),
             '..:9': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_LIST, 9),),
             '..["a"]': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
-            '..[*]': ((c.TRAVERSAL_RECURSE | c.KEY_WILD | c.TYPE_DICT |
-                       c.TYPE_LIST, '*'),),
+            '..[*]': ((c.TRAVERSAL_RECURSE | c.KEY_WILD | c.TYPE_DICT, '*'),),
         }
 
         for path_string, path_parts in tests.iteritems():
@@ -54,7 +53,9 @@ class TestParser(TestCase):
             '["["]': ['['],
             'a.*': ['a', '*'],
             'a[*]': ['a', '*'],
-            'a..b': ['a', 'b']
+            'a..b': ['a', 'b'],
+            '\\[\\]': ['[]'],
+            '["[]"]': ['[]']
         }
 
         for path_string, keys in tests.iteritems():
