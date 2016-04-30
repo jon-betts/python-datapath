@@ -1,5 +1,3 @@
-from itertools import islice
-
 from datapath import constants as c
 from datapath.format import compact_path
 from datapath.util import BranchingList, guess_type
@@ -22,7 +20,6 @@ def walk(data, function, root=None, parent=None, key=None, path=None):
 
     if data_type == c.TYPE_LEAF:
         return
-
     elif data_type == c.TYPE_DICT:
         items = data.iteritems()
     elif data_type == c.TYPE_LIST:
@@ -65,8 +62,9 @@ def walk_path(data, function, path_parts,
                       path=BranchingList())
 
 
+# ---------------- # -------------------------------------------------------- #
+# Internal methods #
 # ---------------- #
-# Internal methods
 
 def _walk_path(context, data, path_pos, parent, key, path):
     data_type = guess_type(data)
@@ -91,9 +89,9 @@ def _walk_path(context, data, path_pos, parent, key, path):
     key_type, key = context['path_parts'][path_pos]
 
     if key_type & c.TRAVERSAL_RECURSE:
-        return walk(data=data,
-                    function=_path_recursion(context, path_pos),
-                    parent=parent, key=None, path=path)
+        return _path_recursion(
+            data=data, parent=parent, path=path, path_pos=path_pos,
+            context=context)
 
     elif not key_type & data_type:
         if context['on_mismatch'] == c.ON_MISMATCH_FAIL:
@@ -113,23 +111,21 @@ def _walk_path(context, data, path_pos, parent, key, path):
 
     # A literal, we know exactly where to go
     elif key_type & c.KEY_LITERAL:
-        missing = (key_type & c.TYPE_DICT and key not in data) or (
-            key_type & c.TYPE_LIST and key >= len(data))
-
-        if missing:
+        try:
+            data[key]
+        except (KeyError, IndexError):
             if context['on_missing'] == c.ON_MISSING_CONTINUE:
                 return
             elif context['on_missing'] == c.ON_MISSING_CREATE:
-                data = _auto_fill(data, data_type, key, context['path_parts'],
-                                  path_pos)
-            else:
-                raise Exception('wut?')
+                data = _auto_fill(data, data_type, key,
+                                  context['path_parts'], path_pos)
 
         return _walk_path(context, data=data[key], key=key, parent=data,
                           path=path.add((c.KEY_LITERAL | data_type, key)),
                           path_pos=path_pos + 1)
 
     elif key_type & (c.KEY_WILD | c.KEY_SLICE):
+        # A wild key
         if key_type & c.KEY_WILD:
             if data_type & c.TYPE_LIST:
                 keys = xrange(len(data))
@@ -138,14 +134,26 @@ def _walk_path(context, data, path_pos, parent, key, path):
             else:
                 raise ValueError('Unknown sub-object type')
 
-        elif key_type & c.KEY_SLICE:
+        # Then it's a slice
+        else:
             if data_type & c.TYPE_LIST and isinstance(key, slice):
-                keys = xrange(*key.indices(len(data)))
+                stop = max(key.stop or 0, len(data))
+                keys = xrange(*key.indices(stop))
             else:
                 # Literal values
                 keys = key
 
         for key in keys:
+            # TODO! - Some copy paste here from above.
+            try:
+                data[key]
+            except (KeyError, IndexError):
+                if context['on_missing'] == c.ON_MISSING_CONTINUE:
+                    return
+                elif context['on_missing'] == c.ON_MISSING_CREATE:
+                    data = _auto_fill(data, data_type, key,
+                                      context['path_parts'], path_pos)
+
             instruction = _walk_path(
                 context, data=data[key], key=key,
                 parent=data, path_pos=path_pos + 1,
@@ -180,22 +188,38 @@ def _auto_fill(data, data_type, key, path_parts, path_pos):
     return data
 
 
-def _path_recursion(context, path_pos):
-    recurse_context = dict(context, on_mismatch=c.ON_MISMATCH_CONTINUE)
-
+def _path_recursion(data, parent, path, path_pos, context):
+    # Generate a mini path to look for
     path_part = context['path_parts'][path_pos]
     search_path = ((path_part[0] ^ c.TRAVERSAL_RECURSE, path_part[1]),)
 
+    # First find all the eligible entities
+
+    worklist = []
+
+    # The general search will find all entities
     def _general_search(path, **kwargs):
-        def _back_to_walk_path(parent, key, data, data_type, **ik):
+
+        # The path aware search will search the search path for eligible
+        # items to resume the main path walk
+        def _back_to_walk_path(parent, key, data, data_type, **_):
             if parent is None and key is None:
                 return
 
-            return _walk_path(
-                context=recurse_context, data=data, parent=parent, key=key,
-                path_pos=path_pos + 1,
-                path=path.add((c.KEY_LITERAL | data_type, key)))
+            worklist.append(
+                dict(data=data, parent=parent, key=key,
+                     path=path.add((c.KEY_LITERAL | data_type, key))))
 
         walk_path(kwargs['data'], _back_to_walk_path, search_path)
 
-    return _general_search
+    walk(data=data,
+         function=_general_search,
+         parent=parent, key=None, path=path)
+
+    # Now start walking through the paths in them. We do this so we don't
+    # create new items as we are searching and recurse infinitely
+
+    path_pos += 1
+
+    for item in worklist:
+        _walk_path(path_pos=path_pos, context=context, **item)

@@ -34,6 +34,10 @@ def parse_path(path_string):
     return parts
 
 
+# ---------------- # -------------------------------------------------------- #
+# Internal methods #
+# ---------------- #
+
 def _find_next(string, pos, stop_chars):
     escaping = False
     out_string = ''

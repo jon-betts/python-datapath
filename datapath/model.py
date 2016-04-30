@@ -1,7 +1,7 @@
 from datapath.parser import parse_path
 from datapath import crud
 from datapath import constants as c
-
+from datapath.walk import walk_path
 
 class DataPathDict(dict):
     # ----------- #
@@ -22,6 +22,11 @@ class DataPathDict(dict):
     def merge(self, other):
         for path_string, value in crud.flatten(other).iteritems():
             self.set(path_string, value)
+
+        return self
+
+    def apply(self, path, function):
+        walk_path(self, function, parse_path(path))
 
         return self
 

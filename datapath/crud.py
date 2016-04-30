@@ -16,23 +16,23 @@ def find_path(data, path_string, on_mismatch=c.ON_MISMATCH_CONTINUE):
     return find_path_parts(data, parse_path(path_string), on_mismatch)
 
 
-def flatten(data, formatter=compact_path):
+def flatten(input_data, formatter=compact_path):
     out = {}
 
-    def _flatten(data_type, data, path, **kwargs):
+    def _flatten(data_type, data, path, **_):
         if data_type & c.TYPE_LEAF:
             out[formatter(reversed(path), is_reversed=True)] = data
 
-    walk(data, _flatten)
+    walk(input_data, _flatten)
 
     return out
 
 
-def unflatten(data, existing=None):
+def unflatten(input_data, existing=None):
     if existing is None:
         existing = {}
 
-    for path_string, value in data.iteritems():
+    for path_string, value in input_data.iteritems():
         set_path(existing, path_string, value)
 
     return existing
@@ -41,24 +41,24 @@ def unflatten(data, existing=None):
 # ----------------- #
 # Path part methods
 
-def find_path_parts(data, path_parts, on_mismatch=c.ON_MISMATCH_CONTINUE):
+def find_path_parts(input_data, path_parts, on_mismatch=c.ON_MISMATCH_CONTINUE):
     items = []
 
-    def _read(data, terminal, **kwargs):
+    def _read(data, terminal, **_):
         if terminal:
             items.append(data)
 
         return c.WALK_CONTINUE
 
-    walk_path(data, _read, path_parts, on_mismatch=on_mismatch)
+    walk_path(input_data, _read, path_parts, on_mismatch=on_mismatch)
 
     return items
 
 
-def get_path_parts(data, path_parts, default=None):
+def get_path_parts(input_data, path_parts, default=None):
     item = [default]
 
-    def _read_one(data, terminal, **kwargs):
+    def _read_one(data, terminal, **_):
         if terminal:
             item[0] = data
 
@@ -66,13 +66,14 @@ def get_path_parts(data, path_parts, default=None):
 
         return c.WALK_CONTINUE
 
-    walk_path(data, _read_one, path_parts, on_mismatch=c.ON_MISMATCH_CONTINUE)
+    walk_path(input_data, _read_one, path_parts,
+              on_mismatch=c.ON_MISMATCH_CONTINUE)
 
     return item[0]
 
 
 def set_path_parts(data, path_parts, value):
-    def _write(terminal, parent, key, **kwargs):
+    def _write(terminal, parent, key, **_):
         # Don't try and set values above the root
         if terminal and parent:
             parent[key] = value
