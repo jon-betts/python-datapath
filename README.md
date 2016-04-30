@@ -86,7 +86,7 @@ Examples:
 | -------- | -----------------------|
 | $.a      | a, .a, ["a"], ['a']    |
 | $.[7]    | [7]                    |
-| $.*      | *, .*                  |
+| $.*      | \*, .\*                |
 | $..a     | ..a                    |
 | @..a     | ..a                    |
 | @.a      | a, .a, ["a"], ['a']    |
@@ -123,7 +123,6 @@ Compliance levels
 The `datapath` library does not support the following parts of JSONPath at the
 moment:
 
- * List slices
  * Selectors beyond `'*'` - no ability to do things like `book[author='lily']`
  * Anchoring specifications: `'@.'`, `'$.'`
 

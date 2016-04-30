@@ -1,11 +1,13 @@
+from copy import deepcopy
+
 from datapath.format import compact_path
 from datapath.parser import parse_path
 from datapath import constants as c
 from datapath.walk import walk_path, walk
 
 
-def set_path(data, path_string, value):
-    return set_path_parts(data, parse_path(path_string), value)
+def set_path(data, path_string, value, copy=False):
+    return set_path_parts(data, parse_path(path_string), value, copy)
 
 
 def get_path(data, path_string, default=None):
@@ -72,11 +74,11 @@ def get_path_parts(input_data, path_parts, default=None):
     return item[0]
 
 
-def set_path_parts(data, path_parts, value):
+def set_path_parts(data, path_parts, value, copy=False):
     def _write(terminal, parent, key, **_):
         # Don't try and set values above the root
         if terminal and parent:
-            parent[key] = value
+            parent[key] = deepcopy(value) if copy else value
 
         return c.WALK_CONTINUE
 

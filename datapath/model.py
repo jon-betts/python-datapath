@@ -3,6 +3,7 @@ from datapath import crud
 from datapath import constants as c
 from datapath.walk import walk_path
 
+
 class DataPathDict(dict):
     # ----------- #
     # Crud access
@@ -13,8 +14,8 @@ class DataPathDict(dict):
     def get(self, path_string, default=None):
         return crud.get_path(self, path_string, default)
 
-    def set(self, path_string, value):
-        return crud.set_path(self, path_string, value)
+    def set(self, path_string, value, copy=True):
+        return crud.set_path(self, path_string, value, copy)
 
     def flatten(self):
         return crud.flatten(self)
@@ -25,9 +26,18 @@ class DataPathDict(dict):
 
         return self
 
-    def apply(self, path, function):
-        walk_path(self, function, parse_path(path))
+    def apply(self, path_string, function):
+        walk_path(self, function, parse_path(path_string))
 
+        return self
+
+    def apply_map(self, path_string, function):
+        def _map(terminal, parent, key, **kwargs):
+            if terminal:
+                print "TERM"
+                parent[key] = function(parent=parent, key=key, **kwargs)
+
+        walk_path(self, _map, parse_path(path_string))
         return self
 
     @classmethod
@@ -55,6 +65,6 @@ class DataPathDict(dict):
 
     def __setitem__(self, key, value):
         if isinstance(key, list):
-            return crud.set_path(self, key[0], value)
+            return crud.set_path(self, key[0], value, copy=True)
 
         return super(DataPathDict, self).__setitem__(key, value)
