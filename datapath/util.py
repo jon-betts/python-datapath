@@ -57,6 +57,9 @@ class BranchingList(object):
 
         return nester
 
+    def __repr__(self):
+        return '<BranchingList>%s' % list(self)
+
 
 def guess_type(obj):
     obj_type = c.TYPE_TO_TYPE_CODE.get(type(obj))

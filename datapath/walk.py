@@ -89,30 +89,9 @@ def _walk_path(context, data, path_pos, parent, key, path):
     key_type, key = context['path_parts'][path_pos]
 
     if key_type & c.TRAVERSAL_RECURSE:
-        recurse_context = dict(context, on_mismatch=c.ON_MISMATCH_CONTINUE)
-
-        def recurse_fn(**kwargs):
-            return _walk_path(
-                context=recurse_context, data=kwargs['data'],
-                path_pos=path_pos + 1, parent=kwargs['parent'],
-                key=kwargs['key'], path=kwargs['path'])
-
-        if key_type & c.KEY_WILD:
-            return walk(
-                data=data,
-                function=recurse_fn,
-                parent=parent, key=None, path=path)
-
-        elif key_type & c.KEY_LITERAL:
-            return walk(
-                data=data,
-                function=lambda **kwargs: recurse_fn(**kwargs)
-                    if kwargs['key'] == key
-                else c.WALK_CONTINUE,
-                parent=parent, key=None, path=path)
-
-        else:
-            raise ValueError('HOW DO YOU EVEN')
+        return walk(data=data,
+                    function=_path_recursion(context, path_pos),
+                    parent=parent, key=None, path=path)
 
     elif not key_type & data_type:
         if context['on_mismatch'] == c.ON_MISMATCH_FAIL:
@@ -191,3 +170,24 @@ def _auto_fill(data, data_type, key, path_parts, path_pos):
         data[key] = next_factory()
 
     return data
+
+
+def _path_recursion(context, path_pos):
+    recurse_context = dict(context, on_mismatch=c.ON_MISMATCH_CONTINUE)
+
+    path_part = context['path_parts'][path_pos]
+    search_path = ((path_part[0] ^ c.TRAVERSAL_RECURSE, path_part[1]),)
+
+    def _general_search(path, **kwargs):
+        def _back_to_walk_path(parent, key, data, data_type, **ik):
+            if parent is None and key is None:
+                return
+
+            return _walk_path(
+                context=recurse_context, data=data, parent=parent, key=key,
+                path_pos=path_pos + 1,
+                path=path.add((c.KEY_LITERAL | data_type, key)))
+
+        walk_path(kwargs['data'], _back_to_walk_path, search_path)
+
+    return _general_search
