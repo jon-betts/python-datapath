@@ -21,28 +21,30 @@ def walk(data, function, root=None, parent=None, key=None, path=None):
     if data_type == c.TYPE_LEAF:
         return
 
-    else:
-        if data_type == c.TYPE_DICT:
-            items = data.iteritems()
-        elif data_type == c.TYPE_LIST:
-            items = enumerate(data)
+    elif data_type == c.TYPE_DICT:
+        items = data.iteritems()
+    elif data_type == c.TYPE_LIST:
+        items = enumerate(data)
 
-        for key, item in items:
-            instruction = walk(
-                # Things that don't change
-                function=function,  root=root,
+    # Prevent changing size:
+    items = tuple(items)
 
-                # Things that do
-                data=item, key=key, parent=data,
-                path=path.add(
-                    (c.TRAVERSAL_CHILD | c.KEY_LITERAL | data_type, key))
-            )
+    for key, item in items:
+        instruction = walk(
+            # Things that don't change
+            function=function, root=root,
 
-            if instruction == c.WALK_PRUNE:
-                break
+            # Things that do
+            data=item, key=key, parent=data,
+            path=path.add(
+                (c.TRAVERSAL_CHILD | c.KEY_LITERAL | data_type, key))
+        )
 
-            if instruction == c.WALK_TERMINATE:
-                return c.WALK_TERMINATE
+        if instruction == c.WALK_PRUNE:
+            break
+
+        if instruction == c.WALK_TERMINATE:
+            return c.WALK_TERMINATE
 
 
 def walk_path(data, function, path_parts,
@@ -87,8 +89,32 @@ def _walk_path(context, data, path_pos, parent, key, path):
 
     key_type, key = context['path_parts'][path_pos]
 
-    # Type mismatch!
-    if not key_type & data_type:
+    if key_type & c.TRAVERSAL_RECURSE:
+        recurse_context = dict(context, on_mismatch=c.ON_MISMATCH_CONTINUE)
+
+        if key_type & c.KEY_WILD:
+            return walk(
+                data=data,
+                function=lambda **kwargs: _walk_path(
+                    context=recurse_context, data=kwargs['data'],
+                    path_pos=path_pos + 1, parent=kwargs['parent'],
+                    key=kwargs['key'], path=kwargs['path']),
+                parent=parent, key=None, path=path)
+
+        elif key_type & c.KEY_LITERAL:
+            return walk(
+                data=data,
+                function=lambda **kwargs: _walk_path(
+                    context=recurse_context, data=kwargs['data'],
+                    path_pos=path_pos + 1, parent=kwargs['parent'],
+                    key=key, path=kwargs['path']) if kwargs['key'] == key
+                else c.WALK_CONTINUE,
+                parent=parent, key=None, path=path)
+
+        else:
+            raise ValueError('HOW DO YOU EVEN')
+
+    elif not key_type & data_type:
         if context['on_mismatch'] == c.ON_MISMATCH_FAIL:
             raise ValueError('Expected %s but found %s at %s: %s' % (
                 c.STRINGS[key_type & c.TYPE_MASK],
@@ -103,30 +129,6 @@ def _walk_path(context, data, path_pos, parent, key, path):
             raise Exception('wut?')
 
     # It's a super mad recursion into the data structure
-    elif key_type & c.TRAVERSAL_RECURSE:
-        recurse_context = dict(context, on_mismatch=c.ON_MISMATCH_CONTINUE)
-
-        if key_type & c.KEY_WILD:
-            return walk(
-                data=data,
-                function=lambda **kwargs: _walk_path(
-                    context=recurse_context, data=kwargs['data'],
-                    path_pos=path_pos + 1, parent=kwargs['parent'],
-                    key=None, path=kwargs['path']),
-                parent=parent, key=None, path=path)
-
-        elif key_type & c.KEY_LITERAL:
-            return walk(
-                data=data,
-                function=lambda **kwargs: _walk_path(
-                    context=recurse_context, data=kwargs['data'],
-                    path_pos=path_pos + 1, parent=kwargs['parent'],
-                    key=None, path=kwargs['path']) if kwargs['key'] == key
-                    else c.WALK_CONTINUE,
-                parent=parent, key=None, path=path)
-
-        else:
-            raise ValueError('HOW DO YOU EVEN')
 
     # A literal, we know exactly where to go
     elif key_type & c.KEY_LITERAL:

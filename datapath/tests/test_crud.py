@@ -1,7 +1,8 @@
+from copy import deepcopy
 from unittest import TestCase
 
 from datapath.tests import json_fixture
-from datapath.crud import find_path, flatten, unflatten
+from datapath.crud import find_path, flatten, unflatten, set_path
 
 
 class TestCrud(TestCase):
@@ -33,6 +34,7 @@ class TestCrud(TestCase):
             '..b': [[2, 3], 4],
             'c..b': [4],
             'c..*': [4, 5, 6, data['c']],
+            '..:0': [2]
         }
 
         for path, expected in tests.iteritems():
@@ -41,6 +43,31 @@ class TestCrud(TestCase):
 
         self.assertEqual(find_path(['good'], '[0]'), ['good'],
                          'Can get a leading list index')
+
+    def test_set_path_recurse(self):
+        data = {
+            'a': {
+                'b': {},
+                'c': [
+                    {'b': {}}
+                ]
+            },
+            'b': {}
+        }
+
+        tests = {
+            '..*': {'a': 'T', 'b': 'T'},
+            '..b': {'a': {'c': [{'b': 'T'}], 'b': 'T'}, 'b': 'T'},
+            '..*.b': {'a': {'c': [{'b': 'T'}], 'b': 'T'}, 'b': 'T'},
+            '..:0': {'a': {'c': ['T'], 'b': {}}, 'b': {}},
+            '..c..b': {'a': {'c': [{'b': 'T'}], 'b': {}}, 'b': {}}
+        }
+
+        for path, expected in tests.iteritems():
+            test_data = deepcopy(data)
+            set_path(test_data, path, 'T')
+            self.assertEqual(test_data, expected,
+                             "Can set recursive path '%s'" % path)
 
     def test_unflatten(self):
         tests = json_fixture('crud/flatten.json')

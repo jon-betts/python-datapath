@@ -25,7 +25,8 @@ class TestParser(TestCase):
             '..[9]': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_LIST, 9),),
             '..9': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_DICT, '9'),),
             '..:9': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_LIST, 9),),
-            '..["a"]': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
+            '..["a"]': (
+                (c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
             '..[*]': ((c.TRAVERSAL_RECURSE | c.KEY_WILD | c.TYPE_DICT, '*'),),
         }
 

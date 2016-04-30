@@ -16,12 +16,12 @@ def find_path(data, path_string, on_mismatch=c.ON_MISMATCH_CONTINUE):
     return find_path_parts(data, parse_path(path_string), on_mismatch)
 
 
-def flatten(data, format=compact_path):
+def flatten(data, formatter=compact_path):
     out = {}
 
     def _flatten(data_type, data, path, **kwargs):
         if data_type & c.TYPE_LEAF:
-            out[format(reversed(path), is_reversed=True)] = data
+            out[formatter(reversed(path), is_reversed=True)] = data
 
     walk(data, _flatten)
 
@@ -73,7 +73,8 @@ def get_path_parts(data, path_parts, default=None):
 
 def set_path_parts(data, path_parts, value):
     def _write(terminal, parent, key, **kwargs):
-        if terminal:
+        # Don't try and set values above the root
+        if terminal and parent:
             parent[key] = value
 
         return c.WALK_CONTINUE

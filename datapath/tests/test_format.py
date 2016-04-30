@@ -5,6 +5,7 @@ from datapath.format import compact_path, canonical_path
 from datapath.tests import json_fixture
 from datapath import constants as c
 
+
 class TestFormat(TestCase):
     longMessage = True
 
