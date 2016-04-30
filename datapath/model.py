@@ -37,7 +37,7 @@ class DataPathDict(dict):
             path_parts = parse_path(item[0])
 
             for key_type, _ in path_parts:
-                if key_type & (c.KEY_WILD | c.TRAVERSAL_RECURSE):
+                if key_type & (c.KEY_WILD | c.KEY_SLICE | c.TRAVERSAL_RECURSE):
                     return crud.find_path_parts(self, path_parts)
 
             default = None

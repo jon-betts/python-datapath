@@ -3,6 +3,37 @@ from datapath import constants as c
 START_TOKEN = '.:['
 
 
+def parse_path(path_string):
+    parts = []
+
+    start, key = _find_next(path_string, 0, START_TOKEN)
+    if start != 0:
+        parts.append((_key_type(key, c.TYPE_DICT), key))
+
+    while start < len(path_string):
+        char = path_string[start]
+        char_plus_1 = path_string[start + 1]
+
+        if char == '.' and char_plus_1 == '.':
+            char_plus_2 = path_string[start + 2]
+            if char_plus_2 in '[:':
+                # Plus 2 to skip over the dots and parse again
+                key_type, key, start = _capture_next(path_string, start + 2)
+            else:
+                # We re-use the dot detection on the last dot to trigger compact
+                # dict key format parsing
+                key_type, key, start = _capture_next(path_string, start + 1)
+
+            key_type |= c.TRAVERSAL_RECURSE
+
+        else:
+            key_type, key, start = _capture_next(path_string, start)
+
+        parts.append((key_type, key))
+
+    return parts
+
+
 def _find_next(string, pos, stop_chars):
     escaping = False
     out_string = ''
@@ -38,24 +69,12 @@ def _capture_next(path_string, start):
 
     # Dot notation or ...
     if char == '.':
-        # It's a recursion
-        if next_char == '.':
-            start, key = _find_next(path_string, start + 1, START_TOKEN)
-            return _key_type(key, c.TYPE_DICT | c.TRAVERSAL_RECURSE), key, start
-        else:
-            start, key = _find_next(path_string, start, START_TOKEN)
-            return _key_type(key, c.TYPE_DICT), key, start
+        start, key = _find_next(path_string, start, START_TOKEN)
+        return _key_type(key, c.TYPE_DICT), key, start
 
     elif char == ':':
         start, key = _find_next(path_string, start, START_TOKEN)
-        key_type = _key_type(key, c.TYPE_LIST)
-
-        if not key_type & c.KEY_WILD:
-            try:
-                key = int(key)
-            except ValueError:
-                raise Exception('wut?')
-
+        key_type, key = _parse_list_index(key)
         return key_type, key, start
 
     # In brackets
@@ -77,37 +96,26 @@ def _capture_next(path_string, start):
         if key == c.CHARS_WILD:
             return c.TYPE_DICT | c.KEY_WILD, key, start + 1
         else:
-            return c.TYPE_LIST | c.KEY_LITERAL, int(key), start + 1
+            key_type, key = _parse_list_index(key)
+            return key_type, key, start + 1
 
     raise ValueError("Unexpected char '%s' at '%s'" % (char, start))
 
 
-def parse_path(path_string):
-    parts = []
+def _parse_list_index(string):
+    if string == c.CHARS_WILD:
+        return c.TYPE_LIST | c.KEY_WILD, string
 
-    start, key = _find_next(path_string, 0, START_TOKEN)
-    if start != 0:
-        parts.append((_key_type(key, c.TYPE_DICT), key))
+    try:
+        return c.TYPE_LIST | c.KEY_LITERAL, int(string)
 
-    while start < len(path_string):
-        char = path_string[start]
-        char_plus_1 = path_string[start + 1]
+    except ValueError:
+        if ':' in string:
+            parts = [None if i is '' else int(i) for i in string.split(':')]
+            return c.TYPE_LIST | c.KEY_SLICE, slice(*parts)
 
-        if char == '.' and char_plus_1 == '.':
-            char_plus_2 = path_string[start + 2]
-            if char_plus_2 in '[:':
-                # Plus 2 to skip over the dots and parse again
-                key_type, key, start = _capture_next(path_string, start + 2)
-            else:
-                # We re-use the dot detection on the last dot to trigger compact
-                # dict key format parsing
-                key_type, key, start = _capture_next(path_string, start + 1)
+        elif ',' in string:
+            return (c.TYPE_LIST | c.KEY_SLICE,
+                    tuple(int(i) for i in string.split(',')))
 
-            key_type |= c.TRAVERSAL_RECURSE
-
-        else:
-            key_type, key, start = _capture_next(path_string, start)
-
-        parts.append((key_type, key))
-
-    return parts
+    raise ValueError("Cannot parse list index '%s'" % string)

@@ -9,10 +9,9 @@ TYPE_MASK = 0x000F
 
 KEY_LITERAL = 1 << 8
 KEY_WILD = 2 << 8
-KEY_MASK = 0x00F0
+KEY_SLICE = 4 << 8
 
 TRAVERSAL_RECURSE = 2 << 16
-TRAVERSAL_MASK = 0x0F00
 
 # -------------------------------------------------------------------------- #
 

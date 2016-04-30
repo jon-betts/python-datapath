@@ -1,3 +1,5 @@
+from itertools import islice
+
 from datapath import constants as c
 from datapath.format import compact_path
 from datapath.util import BranchingList, guess_type
@@ -127,21 +129,27 @@ def _walk_path(context, data, path_pos, parent, key, path):
                           path=path.add((c.KEY_LITERAL | data_type, key)),
                           path_pos=path_pos + 1)
 
-    # A wild card, we go everywhere
-    elif key_type & c.KEY_WILD:
-        if data_type & c.TYPE_LIST:
-            keys = xrange(len(data))
-        elif data_type & c.TYPE_DICT:
-            keys = data.iterkeys()
-        else:
-            raise ValueError('Unknown sub-object type')
+    elif key_type & (c.KEY_WILD | c.KEY_SLICE):
+        if key_type & c.KEY_WILD:
+            if data_type & c.TYPE_LIST:
+                keys = xrange(len(data))
+            elif data_type & c.TYPE_DICT:
+                keys = data.iterkeys()
+            else:
+                raise ValueError('Unknown sub-object type')
+
+        elif key_type & c.KEY_SLICE:
+            if data_type & c.TYPE_LIST and isinstance(key, slice):
+                keys = xrange(*key.indices(len(data)))
+            else:
+                # Literal values
+                keys = key
 
         for key in keys:
             instruction = _walk_path(
                 context, data=data[key], key=key,
                 parent=data, path_pos=path_pos + 1,
-                path=path.add((c.KEY_LITERAL | data_type, key))
-            )
+                path=path.add((c.KEY_LITERAL | data_type, key)))
 
             if instruction == c.WALK_PRUNE:
                 break
