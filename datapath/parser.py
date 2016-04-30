@@ -74,12 +74,10 @@ def _capture_next(path_string, start):
         # Raw in brackets
         start, key = _find_next(path_string, start, ']')
 
-        if key.isdigit():
-            return c.TYPE_LIST | c.KEY_LITERAL, int(key), start + 1
-        elif key == c.CHARS_WILD:
+        if key == c.CHARS_WILD:
             return c.TYPE_DICT | c.KEY_WILD, key, start + 1
         else:
-            return c.TYPE_DICT | c.KEY_LITERAL, key, start + 1
+            return c.TYPE_LIST | c.KEY_LITERAL, int(key), start + 1
 
     raise ValueError("Unexpected char '%s' at '%s'" % (char, start))
 
@@ -89,7 +87,7 @@ def parse_path(path_string):
 
     start, key = _find_next(path_string, 0, START_TOKEN)
     if start != 0:
-        parts.append((_key_type(key, c.TYPE_DICT | c.TRAVERSAL_CHILD), key))
+        parts.append((_key_type(key, c.TYPE_DICT), key))
 
     while start < len(path_string):
         char = path_string[start]
@@ -109,7 +107,6 @@ def parse_path(path_string):
 
         else:
             key_type, key, start = _capture_next(path_string, start)
-            key_type |= c.TRAVERSAL_CHILD
 
         parts.append((key_type, key))
 

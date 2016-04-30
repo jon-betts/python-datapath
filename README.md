@@ -78,7 +78,7 @@ are made:
   
  * All paths are local
  * 'Naked' paths without a prefix are assumed to be dict keys
- * Bracked paths are assumed to be on the local object
+ * Bracketed paths are assumed to be on the local object
  
 Examples:
 

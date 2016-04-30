@@ -53,7 +53,7 @@ def _compact_part(key_type, key):
     elif key_type & c.TYPE_LIST:
         key = ':' + str(key)
 
-    if key_type & c.TRAVERSAL_CHILD:
+    if not key_type & c.TRAVERSAL_RECURSE:
         return key
 
     elif key_type & c.TRAVERSAL_RECURSE:

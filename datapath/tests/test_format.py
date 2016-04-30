@@ -24,4 +24,4 @@ class TestFormat(TestCase):
                 "Converted '%s' to '%s'" % (string_path, expected))
 
         with self.assertRaises(Exception):
-            canonical_path((c.KEY_WILD | c.TRAVERSAL_CHILD | c.TYPE_LIST, '*'))
+            canonical_path((c.KEY_WILD | c.TYPE_LIST, '*'))

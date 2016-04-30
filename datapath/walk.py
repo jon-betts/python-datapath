@@ -36,8 +36,7 @@ def walk(data, function, root=None, parent=None, key=None, path=None):
 
             # Things that do
             data=item, key=key, parent=data,
-            path=path.add(
-                (c.TRAVERSAL_CHILD | c.KEY_LITERAL | data_type, key))
+            path=path.add((c.KEY_LITERAL | data_type, key))
         )
 
         if instruction == c.WALK_PRUNE:
@@ -92,22 +91,23 @@ def _walk_path(context, data, path_pos, parent, key, path):
     if key_type & c.TRAVERSAL_RECURSE:
         recurse_context = dict(context, on_mismatch=c.ON_MISMATCH_CONTINUE)
 
+        def recurse_fn(**kwargs):
+            return _walk_path(
+                context=recurse_context, data=kwargs['data'],
+                path_pos=path_pos + 1, parent=kwargs['parent'],
+                key=kwargs['key'], path=kwargs['path'])
+
         if key_type & c.KEY_WILD:
             return walk(
                 data=data,
-                function=lambda **kwargs: _walk_path(
-                    context=recurse_context, data=kwargs['data'],
-                    path_pos=path_pos + 1, parent=kwargs['parent'],
-                    key=kwargs['key'], path=kwargs['path']),
+                function=recurse_fn,
                 parent=parent, key=None, path=path)
 
         elif key_type & c.KEY_LITERAL:
             return walk(
                 data=data,
-                function=lambda **kwargs: _walk_path(
-                    context=recurse_context, data=kwargs['data'],
-                    path_pos=path_pos + 1, parent=kwargs['parent'],
-                    key=key, path=kwargs['path']) if kwargs['key'] == key
+                function=lambda **kwargs: recurse_fn(**kwargs)
+                    if kwargs['key'] == key
                 else c.WALK_CONTINUE,
                 parent=parent, key=None, path=path)
 

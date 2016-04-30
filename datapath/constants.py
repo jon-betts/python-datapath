@@ -11,14 +11,8 @@ KEY_LITERAL = 1 << 8
 KEY_WILD = 2 << 8
 KEY_MASK = 0x00F0
 
-TRAVERSAL_CHILD = 1 << 16
 TRAVERSAL_RECURSE = 2 << 16
 TRAVERSAL_MASK = 0x0F00
-
-ANCHOR_LOCAL = 1 << 24
-ANCHOR_ABSOLUTE = 2 << 24
-ANCHOR_MASK = 0xF000
-
 
 # -------------------------------------------------------------------------- #
 
@@ -45,7 +39,6 @@ STRINGS = {
     TYPE_DICT: 'TYPE_DICT',
     KEY_LITERAL: 'KEY_LITERAL',
     KEY_WILD: 'KEY_WILD',
-    TRAVERSAL_CHILD: 'TRAVERSAL_CHILD',
     TRAVERSAL_RECURSE: 'TRAVERSAL_RECURSE'
 }
 
