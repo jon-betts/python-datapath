@@ -4,11 +4,23 @@ START_TOKEN = '.:['
 
 
 def parse_path(path_string):
+    start = 0
+
+    if path_string[0] == c.CHARS_ANCHOR_ROOT:
+        path_type = c.ANCHOR_ROOT
+        start += 1
+    elif path_string[0] == c.CHARS_ANCHOR_LOCAL:
+        path_type = c.ANCHOR_LOCAL
+        start += 1
+    else:
+        path_type = c.ANCHOR_LOCAL | c.ANCHOR_ROOT
+
     parts = []
 
-    start, key = _find_next(path_string, 0, START_TOKEN)
-    if start != 0:
+    new_start, key = _find_next(path_string, start, START_TOKEN)
+    if new_start != start:
         parts.append((_key_type(key, c.TYPE_DICT), key))
+        start = new_start
 
     while start < len(path_string):
         char = path_string[start]
@@ -30,6 +42,8 @@ def parse_path(path_string):
             key_type, key, start = _capture_next(path_string, start)
 
         parts.append((key_type, key))
+
+    parts[0] = (parts[0][0] | path_type, parts[0][1])
 
     return parts
 

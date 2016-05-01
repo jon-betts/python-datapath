@@ -13,7 +13,13 @@ KEY_SLICE = 4 << 8
 
 TRAVERSAL_RECURSE = 2 << 16
 
+ANCHOR_LOCAL = 1 << 24
+ANCHOR_ROOT = 2 << 24
+
 # -------------------------------------------------------------------------- #
+
+CHARS_ANCHOR_ROOT = '$'
+CHARS_ANCHOR_LOCAL = '@'
 
 CHARS_WILD = '*'
 # TODO - This isn't used, we look for the chars separately in the parser
@@ -38,7 +44,10 @@ STRINGS = {
     TYPE_DICT: 'TYPE_DICT',
     KEY_LITERAL: 'KEY_LITERAL',
     KEY_WILD: 'KEY_WILD',
-    TRAVERSAL_RECURSE: 'TRAVERSAL_RECURSE'
+    KEY_SLICE: 'KEY_SLICE',
+    TRAVERSAL_RECURSE: 'TRAVERSAL_RECURSE',
+    ANCHOR_LOCAL: 'ANCHOR_LOCAL',
+    ANCHOR_ROOT: 'ANCHOR_ROOT',
 }
 
 TYPE_TO_TYPE_CODE = {

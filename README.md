@@ -82,18 +82,18 @@ are made:
  
 You can mix and match compact paths or JSON Paths in the same path.
  
-| Action                  | Compact path | JSON Path    |
-| ----------------------- | ------------ | ------------ |
-| Dict key                | `.a`         | `["a"]`      |
-| Dict key wild           | `.*`         | `[*]`        |
-| Dict key slice          | `["a", "b"]` | `["a", "b"]` |
-| Recurse to dict key     | `..a`        | `..a`        |
-| Recurse to any dict key | `..*`        | `..*`        |
-| List key                | `:3`         | `[3]`        |
-| List key wild           | `:*`         | n/a          |
-| List slice              | `[0:10:2]`   | `[0:10:2]`   |
-| List slice (range)      | `[0,2,-1]`   | `[0,2,-1]`   |
-| Recurse to list key     | `..:0`       | n/a          |
+| Action                  | Compact path | JSON Path     |
+| ----------------------- | ------------ | ------------- |
+| Dict key                | `.a`, `a`    | `$["a"]`      |
+| Dict key wild           | `.*`, `*`    | `$[*]`        |
+| Dict key slice          | `["a", "b"]` | `$["a", "b"]` |
+| Recurse to dict key     | `..a`        | `$..a`        |
+| Recurse to any dict key | `..*`        | `$..*`        |
+| List key                | `:3`, `[3]`  | `$[3]`        |
+| List key wild           | `:*`         | n/a           |
+| List slice              | `[0:10:2]`   | `$[0:10:2]`   |
+| List slice (range)      | `[0,2,-1]`   | `$[0,2,-1]`   |
+| Recurse to list key     | `..:0`       | n/a           |
  
 ### Anchoring
 
@@ -101,7 +101,7 @@ The JSONPath spec suggest `'@.'` for local anchoring and `'$.'` for root
 anchoring. Where anchoring is not specified or relevant `datapath` allows the 
 omission of the leading identifiers.
 
-**NOTE!** - Currently `datapath` doesn't allow anchoring markers
+**NOTE!** - Currently `datapath` parses anchors, but does nothing with them.
 
 Escaping
 --------
@@ -120,8 +120,8 @@ Compliance levels
 The `datapath` library does not support the following parts of JSONPath at the
 moment:
 
- * Selectors beyond `'*'` - no ability to do things like `book[author='lily']`
- * Anchoring specifications: `'@.'`, `'$.'`
+ * Selectors beyond `'*'` or slices
+ * No ability to do things like `book[author='lily']`
 
 Known issues
 ------------
