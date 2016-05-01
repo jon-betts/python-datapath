@@ -120,9 +120,10 @@ def _walk_path(context, data, path_pos, parent, key, path):
                 data = _auto_fill(data, data_type, key,
                                   context['path_parts'], path_pos)
 
-        return _walk_path(context, data=data[key], key=key, parent=data,
-                          path=path.add((c.KEY_LITERAL | data_type, key)),
-                          path_pos=path_pos + 1)
+        return _walk_path(
+            context, data=data[key], key=key, parent=data,
+            path=path.add((c.KEY_LITERAL | data_type, key, path_pos)),
+            path_pos=path_pos + 1)
 
     elif key_type & (c.KEY_WILD | c.KEY_SLICE):
         # A wild key
@@ -159,7 +160,7 @@ def _walk_path(context, data, path_pos, parent, key, path):
             instruction = _walk_path(
                 context, data=data[key], key=key,
                 parent=data, path_pos=path_pos + 1,
-                path=path.add((c.KEY_LITERAL | data_type, key)))
+                path=path.add((c.KEY_LITERAL | data_type, key, path_pos)))
 
             if instruction == c.WALK_PRUNE:
                 break
@@ -197,20 +198,20 @@ def _path_recursion(data, parent, path, path_pos, context):
 
     # First find all the eligible entities
 
-    worklist = []
+    work_list = []
 
     # The general search will find all entities
     def _general_search(path, **kwargs):
-
         # The path aware search will search the search path for eligible
         # items to resume the main path walk
         def _back_to_walk_path(parent, key, data, data_type, **_):
             if parent is None and key is None:
                 return
 
-            worklist.append(
+            work_list.append(
                 dict(data=data, parent=parent, key=key,
-                     path=path.add((c.KEY_LITERAL | data_type, key))))
+                     path=path.add((c.KEY_LITERAL | guess_type(parent),
+                                    key, path_pos))))
 
         walk_path(kwargs['data'], _back_to_walk_path, search_path)
 
@@ -223,5 +224,5 @@ def _path_recursion(data, parent, path, path_pos, context):
 
     path_pos += 1
 
-    for item in worklist:
+    for item in work_list:
         _walk_path(path_pos=path_pos, context=context, **item)

@@ -44,7 +44,7 @@ class TestParser(TestCase):
             ':0, 1, 2': [(c.TYPE_LIST | c.KEY_SLICE, (0, 1, 2)), ],
             '[0, 1, 2]': [(c.TYPE_LIST | c.KEY_SLICE, (0, 1, 2)), ],
 
-            # Recusing
+            # Recursing
             '..a': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
             '..*': ((c.TRAVERSAL_RECURSE | c.KEY_WILD | c.TYPE_DICT, '*'),),
             '..[9]': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_LIST, 9),),
@@ -114,7 +114,7 @@ class TestParser(TestCase):
             '@..*': ((c.TYPE_DICT | c.KEY_WILD | c.TRAVERSAL_RECURSE |
                       c.ANCHOR_LOCAL, '*'),),
             '..*': ((c.TYPE_DICT | c.KEY_WILD | c.TRAVERSAL_RECURSE |
-                      c.ANCHOR_LOCAL | c.ANCHOR_ROOT, '*'),),
+                     c.ANCHOR_LOCAL | c.ANCHOR_ROOT, '*'),),
         }
 
         for path_string, expected_parts in tests.iteritems():

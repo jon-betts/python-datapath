@@ -34,7 +34,6 @@ class DataPathDict(dict):
     def apply_map(self, path_string, function):
         def _map(terminal, parent, key, **kwargs):
             if terminal:
-                print "TERM"
                 parent[key] = function(parent=parent, key=key, **kwargs)
 
         walk_path(self, _map, parse_path(path_string))

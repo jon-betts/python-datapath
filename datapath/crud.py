@@ -57,6 +57,21 @@ def find_path_parts(input_data, path_parts, on_mismatch=c.ON_MISMATCH_CONTINUE):
     return items
 
 
+def explain_path_parts(input_data, path_parts,
+                       on_mismatch=c.ON_MISMATCH_CONTINUE):
+    items = []
+
+    def _read(data, path, terminal, **_):
+        if terminal:
+            items.append({'value': data, 'path': path})
+
+        return c.WALK_CONTINUE
+
+    walk_path(input_data, _read, path_parts, on_mismatch=on_mismatch)
+
+    return items
+
+
 def get_path_parts(input_data, path_parts, default=None):
     item = [default]
 
