@@ -25,16 +25,23 @@ class TestCrud(TestCase):
             'b': [[2, 3]],
             'b[0]': [2],
             'b[*]': [],
+            'b[1:]': [3],
+            'b[:1]': [2],
+            'b[::-1]': [3, 2],
             'b:*': [2, 3],
             'c.b': [4],
             'c["b"]': [4],
             "c['b']": [4],
+            'c["b", "d"]': [4, 5],
+            'c.b,d': [],
             'c.*': [4, 5, 6],
             'c[*]': [4, 5, 6],
             '..b': [[2, 3], 4],
             'c..b': [4],
             'c..*': [4, 5, 6],
-            '..:0': [2]
+            '..:0': [2],
+            '..:0,1': [2, 3],
+            'b:0:0': [],
         }
 
         for path, expected in tests.iteritems():
@@ -43,6 +50,22 @@ class TestCrud(TestCase):
 
         self.assertEqual(find_path(['good'], '[0]'), ['good'],
                          'Can get a leading list index')
+
+    def test_set_path(self):
+        data = {
+            'c': 'C'
+        }
+
+        tests = {
+            'a': {'a': 'T', 'c': 'C'},
+            'a:0': {'a': ['T'], 'c': 'C'},
+            'a.b': {'a': {'b': 'T'}, 'c': 'C'},
+            '.*': {'c': 'T'}
+        }
+
+        for path, expected in tests.iteritems():
+            self.assertEqual(set_path(deepcopy(data), path, 'T'), expected,
+                             "Can set the path '%s'" % path)
 
     def test_set_path_recurse(self):
         data = {
@@ -61,7 +84,7 @@ class TestCrud(TestCase):
             '..*.b': {'a': {'b': 'T', 'c': [{'b': {'b': 'T'}}]},
                       'b': {'b': 'T'}},
             '..:0': {'a': {'c': ['T'], 'b': {}}, 'b': {}},
-            '..c..b': {'a': {'c': [{'b': 'T'}], 'b': {}}, 'b': {}}
+            '..c..b': {'a': {'c': [{'b': 'T'}], 'b': {}}, 'b': {}},
         }
 
         for path, expected in tests.iteritems():

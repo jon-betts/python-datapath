@@ -80,29 +80,26 @@ are made:
  * 'Naked' paths without a prefix are assumed to be dict keys
  * Bracketed paths are assumed to be on the local object
  
-Examples:
-
-| JSONPath | `datapath` equivalents |
-| -------- | -----------------------|
-| $.a      | a, .a, ["a"], ['a']    |
-| $.[7]    | [7]                    |
-| $.*      | \*, .\*                |
-| $..a     | ..a                    |
-| @..a     | ..a                    |
-| @.a      | a, .a, ["a"], ['a']    |
+You can mix and match compact paths or JSON Paths in the same path.
+ 
+| Action                  | Compact path | JSON Path    |
+| ----------------------- | ------------ | ------------ |
+| Dict key                | `.a`         | `["a"]`      |
+| Dict key wild           | `.*`         | `[*]`        |
+| Dict key slice          | `["a", "b"]` | `["a", "b"]` |
+| Recurse to dict key     | `..a`        | `..a`        |
+| Recurse to any dict key | `..*`        | `..*`        |
+| List key                | `:3`         | `[3]`        |
+| List key wild           | `:*`         | n/a          |
+| List slice              | `[0:10:2]`   | `[0:10:2]`   |
+| List slice (range)      | `[0,2,-1]`   | `[0,2,-1]`   |
+| Recurse to list key     | `..:0`       | n/a          |
+ 
+### Anchoring
 
 The JSONPath spec suggest `'@.'` for local anchoring and `'$.'` for root 
 anchoring. Where anchoring is not specified or relevant `datapath` allows the 
-omission of the leading identifiers for example:
-
-| JSONPath | `datapath` compact  |
-| -------- | ------------------- |
-| $.a, | a |                     |
-| @.a | a  |                     |
-| $.['a']  | a                   |
-| @.['a']  | a                   |
-| $.["a"]  | a                   |
-| @.["a"]  | a                   |
+omission of the leading identifiers.
 
 **NOTE!** - Currently `datapath` doesn't allow anchoring markers
 
@@ -130,4 +127,7 @@ Known issues
 ------------
 
  * This library doesn't work, and using it is a fools errand
+ * Setting recursive paths is a bit wonky
+   ** Sometimes it's accurate but counter intuitive
+   ** Other times it doesn't make any sense at all
   

@@ -9,17 +9,42 @@ class TestParser(TestCase):
 
     def test_parser(self):
         tests = {
+            # Dict keys
             '9': ((c.KEY_LITERAL | c.TYPE_DICT, '9'),),
             'a': ((c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
             '.a': ((c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
             '["a"]': ((c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
             "['a']": ((c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
-            '[9]': ((c.KEY_LITERAL | c.TYPE_LIST, 9),),
-            ':9': ((c.KEY_LITERAL | c.TYPE_LIST, 9),),
-            ':*': ((c.KEY_WILD | c.TYPE_LIST, '*'),),
+            "['a', 'b']": ((c.KEY_SLICE | c.TYPE_DICT, ('a', 'b')),),
+
             '*': ((c.KEY_WILD | c.TYPE_DICT, '*'),),
             '.*': ((c.KEY_WILD | c.TYPE_DICT, '*'),),
             '[*]': ((c.KEY_WILD | c.TYPE_DICT, '*'),),
+            '["a", "b"]': ((c.KEY_SLICE | c.TYPE_DICT, ('a', 'b')),),
+
+            # List indices
+            ':*': ((c.KEY_WILD | c.TYPE_LIST, '*'),),
+            ':0': [(c.TYPE_LIST | c.KEY_LITERAL, 0), ],
+            '[0]': [(c.TYPE_LIST | c.KEY_LITERAL, 0), ],
+            ':-1': [(c.TYPE_LIST | c.KEY_LITERAL, -1), ],
+
+            '[-1]': [(c.TYPE_LIST | c.KEY_LITERAL, -1), ],
+            '[:]': [(c.TYPE_LIST | c.KEY_SLICE, slice(None, None, None)), ],
+            '[::]': [(c.TYPE_LIST | c.KEY_SLICE, slice(None, None, None)), ],
+            '[0:]': [(c.TYPE_LIST | c.KEY_SLICE, slice(0, None, None)), ],
+            '[:0]': [(c.TYPE_LIST | c.KEY_SLICE, slice(None, 0, None)), ],
+            '[::0]': [(c.TYPE_LIST | c.KEY_SLICE, slice(None, None, 0)), ],
+            ':0:0': [
+                (c.TYPE_LIST | c.KEY_LITERAL, 0),
+                (c.TYPE_LIST | c.KEY_LITERAL, 0)
+            ],
+
+            ':0,1,2': [(c.TYPE_LIST | c.KEY_SLICE, (0, 1, 2)), ],
+            '[0,1,2]': [(c.TYPE_LIST | c.KEY_SLICE, (0, 1, 2)), ],
+            ':0, 1, 2': [(c.TYPE_LIST | c.KEY_SLICE, (0, 1, 2)), ],
+            '[0, 1, 2]': [(c.TYPE_LIST | c.KEY_SLICE, (0, 1, 2)), ],
+
+            # Recusing
             '..a': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_DICT, 'a'),),
             '..*': ((c.TRAVERSAL_RECURSE | c.KEY_WILD | c.TYPE_DICT, '*'),),
             '..[9]': ((c.TRAVERSAL_RECURSE | c.KEY_LITERAL | c.TYPE_LIST, 9),),

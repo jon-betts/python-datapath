@@ -85,16 +85,9 @@ def _capture_next(path_string, start):
     elif char == '[':
         # Quoted in brackets
         if next_char in '"\'':
-            start, key = _find_next(path_string, start + 1, next_char)
+            return _parse_dict_key(path_string, start, ']')
 
-            # Skip the ending quote
-            start += 1
-            if path_string[start] != ']':
-                raise ValueError('Expected ] at %s' % start)
-
-            return c.TYPE_DICT | c.KEY_LITERAL, key, start + 1
-
-        # Raw in brackets
+        # Raw value in brackets
         start, key = _find_next(path_string, start, ']')
 
         if key == c.CHARS_WILD:
@@ -123,3 +116,38 @@ def _parse_list_index(string):
                     tuple(int(i) for i in string.split(',')))
 
     raise ValueError("Cannot parse list index '%s'" % string)
+
+
+def _parse_dict_key(string, start, end_tokens):
+    parts = []
+    quotes = "'\""
+
+    while start < len(string):
+        char = string[start]
+        if char in quotes:
+            start, part = _find_next(string, start + 1, char)
+            parts.append(part)
+
+            start += 1
+            next_char = string[start]
+
+            if next_char in end_tokens:
+                break
+
+            start, part = _find_next(string, start, quotes)
+            if part.strip() != ',':
+                raise ValueError(
+                    "Unexpected dict separator '%s' in '%s'" % (part, string))
+        else:
+            if char == c.CHARS_WILD:
+                if string[start + 1] in end_tokens:
+                    return c.TYPE_DICT | c.KEY_WILD, char, start + 1
+
+                raise ValueError("Unexpected character after *")
+
+            raise ValueError("Expected quote at %s in '%s'" % (start, string))
+
+    if len(parts) == 1:
+        return c.TYPE_DICT | c.KEY_LITERAL, parts[0], start + 1
+
+    return c.TYPE_DICT | c.KEY_SLICE, tuple(parts), start + 1
