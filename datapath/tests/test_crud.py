@@ -85,6 +85,8 @@ class TestCrud(TestCase):
                       'b': {'b': 'T'}},
             '..:0': {'a': {'c': ['T'], 'b': {}}, 'b': {}},
             '..c..b': {'a': {'c': [{'b': 'T'}], 'b': {}}, 'b': {}},
+            '..["b", "c"]': {'a': {'c': 'T', 'b': 'T'}, 'b': 'T'},
+            '..["c", "b"]': {'a': {'c': 'T', 'b': 'T'}, 'b': 'T'},
         }
 
         for path, expected in tests.iteritems():

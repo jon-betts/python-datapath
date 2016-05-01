@@ -129,5 +129,4 @@ Known issues
  * This library doesn't work, and using it is a fools errand
  * Setting recursive paths is a bit wonky
    ** Sometimes it's accurate but counter intuitive
-   ** Other times it doesn't make any sense at all
   

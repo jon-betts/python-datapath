@@ -149,10 +149,12 @@ def _walk_path(context, data, path_pos, parent, key, path):
                 data[key]
             except (KeyError, IndexError):
                 if context['on_missing'] == c.ON_MISSING_CONTINUE:
-                    return
+                    continue
                 elif context['on_missing'] == c.ON_MISSING_CREATE:
                     data = _auto_fill(data, data_type, key,
                                       context['path_parts'], path_pos)
+                else:
+                    raise
 
             instruction = _walk_path(
                 context, data=data[key], key=key,
